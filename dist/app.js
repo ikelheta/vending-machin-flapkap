@@ -27,7 +27,7 @@ const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use(cors());
 // ---------------------------------------------------------LogIn----------------------------------------------------------------------------
-app.post("/login/user", (req, res) => {
+app.post("/api/user/login", (req, res) => {
     const p = login_1.LoginController.UserLogIn(req.body).pipe((0, rxjs_1.take)(1)).subscribe({
         next(r) {
             res.send(r);
@@ -47,7 +47,7 @@ app.post("/login/user", (req, res) => {
     });
 });
 // ---------------------------------------------------------signUp----------------------------------------------------------------------------
-app.post("/signup", (req, res) => {
+app.post("/api/user/signup", (req, res) => {
     const p = user_1.UserController.createUser(req.body).pipe((0, rxjs_1.take)(1)).subscribe({
         next(r) {
             res.send(r);
@@ -67,7 +67,7 @@ app.post("/signup", (req, res) => {
     });
 });
 //-------------------------------------------------------------User-------------------------------------------------------------------------------------------
-app.get("/user/:id", authontication_1.isTokenValid, (req, res) => {
+app.get("/api/user/:id", authontication_1.isTokenValid, (req, res) => {
     const p = user_1.UserController.findUser(req.params.id).pipe((0, rxjs_1.take)(1)).subscribe({
         next(r) {
             res.send(r);
@@ -78,7 +78,7 @@ app.get("/user/:id", authontication_1.isTokenValid, (req, res) => {
     });
 });
 //-------------------------------------------------------------User-------------------------------------------------------------------------------------------
-app.get("/users/all/:pn", authontication_1.isTokenValid, (req, res) => {
+app.get("/api/users/all/:pn", authontication_1.isTokenValid, (req, res) => {
     const p = user_1.UserController.findAllUserPagination(Number(req.params.id)).pipe((0, rxjs_1.take)(1)).subscribe({
         next(r) {
             res.send(r);
@@ -89,7 +89,7 @@ app.get("/users/all/:pn", authontication_1.isTokenValid, (req, res) => {
     });
 });
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
-app.put("/user/:id", authontication_1.isTokenValid, (req, res) => {
+app.put("/api/user/:id", authontication_1.isTokenValid, (req, res) => {
     if (req.user.id === req.params.id) {
         const p = user_1.UserController.updateUser(req.params.id, req.body).pipe((0, rxjs_1.take)(1)).subscribe({
             next(r) {
@@ -105,7 +105,7 @@ app.put("/user/:id", authontication_1.isTokenValid, (req, res) => {
     }
 });
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
-app.delete("/user/:id", authontication_1.isTokenValid, (req, res) => {
+app.delete("/api/user/:id", authontication_1.isTokenValid, (req, res) => {
     if (req.user.id === req.params.id) {
         const p = user_1.UserController.deleteUser(req.params.id).pipe((0, rxjs_1.take)(1)).subscribe({
             next(r) {
@@ -122,7 +122,7 @@ app.delete("/user/:id", authontication_1.isTokenValid, (req, res) => {
 });
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------signUp----------------------------------------------------------------------------
-app.post("/product", authontication_1.isTokenValid, authontication_1.isSeller, (req, res) => {
+app.post("/api/product", authontication_1.isTokenValid, authontication_1.isSeller, (req, res) => {
     const p = product_1.ProductController.createProduct(req.body, req.user.id).pipe((0, rxjs_1.take)(1)).subscribe({
         next(r) {
             res.send(r);
@@ -133,7 +133,7 @@ app.post("/product", authontication_1.isTokenValid, authontication_1.isSeller, (
     });
 });
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
-app.put("/product/:id", authontication_1.isTokenValid, authontication_1.isSeller, (req, res) => {
+app.put("/api/product/:id", authontication_1.isTokenValid, authontication_1.isSeller, (req, res) => {
     const p = product_1.ProductController.updateProduct(req.params.id, req.user.id, req.body).pipe((0, rxjs_1.take)(1)).subscribe({
         next(r) {
             res.send(r);
@@ -144,7 +144,7 @@ app.put("/product/:id", authontication_1.isTokenValid, authontication_1.isSeller
     });
 });
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
-app.delete("/product/:id", authontication_1.isTokenValid, authontication_1.isSeller, (req, res) => {
+app.delete("/api/product/:id", authontication_1.isTokenValid, authontication_1.isSeller, (req, res) => {
     const p = product_1.ProductController.deleteProduct(req.params.id, req.user.id).pipe((0, rxjs_1.take)(1)).subscribe({
         next(r) {
             res.send(r);
@@ -155,7 +155,7 @@ app.delete("/product/:id", authontication_1.isTokenValid, authontication_1.isSel
     });
 });
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
-app.get("/products/all/:pn", authontication_1.isTokenValid, (req, res) => {
+app.get("/pi/products/all/:pn", authontication_1.isTokenValid, (req, res) => {
     const p = product_1.ProductController.findAllProductPagination(Number(req.params.pn)).pipe((0, rxjs_1.take)(1)).subscribe({
         next(r) {
             res.send(r);
@@ -166,25 +166,7 @@ app.get("/products/all/:pn", authontication_1.isTokenValid, (req, res) => {
     });
 });
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
-// ---------------------------------------------------------deposit----------------------------------------------------------------------------
-app.get("/deposite/add/:coins", authontication_1.isTokenValid, authontication_1.isBuyer, (req, res) => {
-    const coins = Number(req.params.coins);
-    if (constants_1.COINS_ARRAY.includes(coins)) {
-        const p = deposite_1.DepositeController.addCoinsToAccount(req.user.id, coins).pipe((0, rxjs_1.take)(1)).subscribe({
-            next(r) {
-                res.send(r);
-            },
-            error(e) {
-                res.sendStatus(404);
-            }
-        });
-    }
-    else {
-        res.status(400).json({ message: `only buyers can add coins and coins must be in ${[...constants_1.COINS_ARRAY]}` });
-    }
-});
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-app.post("/product/buy", authontication_1.isTokenValid, authontication_1.isBuyer, (req, res) => {
+app.post("/api/product/buy", authontication_1.isTokenValid, authontication_1.isBuyer, (req, res) => {
     const p = deposite_1.DepositeController.purchaseProduct(req.body.productId, req.body.amount, req.user.id).pipe((0, rxjs_1.take)(1)).subscribe({
         next(r) {
             res.send(r);
@@ -213,7 +195,25 @@ app.post("/product/buy", authontication_1.isTokenValid, authontication_1.isBuyer
     });
 });
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
-app.post("/deposit/reset/:id", authontication_1.isTokenValid, (req, res) => {
+// ---------------------------------------------------------deposit----------------------------------------------------------------------------
+app.get("/api/deposite/add/:coins", authontication_1.isTokenValid, authontication_1.isBuyer, (req, res) => {
+    const coins = Number(req.params.coins);
+    if (constants_1.COINS_ARRAY.includes(coins)) {
+        const p = deposite_1.DepositeController.addCoinsToAccount(req.user.id, coins).pipe((0, rxjs_1.take)(1)).subscribe({
+            next(r) {
+                res.send(r);
+            },
+            error(e) {
+                res.sendStatus(404);
+            }
+        });
+    }
+    else {
+        res.status(400).json({ message: `only buyers can add coins and coins must be in ${[...constants_1.COINS_ARRAY]}` });
+    }
+});
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+app.post("/api/deposit/reset/:id", authontication_1.isTokenValid, (req, res) => {
     if (req.user.id === req.params.id) {
         const p = deposite_1.DepositeController.resetDeposit(req.user.id).pipe((0, rxjs_1.take)(1)).subscribe({
             next(r) {

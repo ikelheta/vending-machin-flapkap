@@ -13,7 +13,7 @@ export class LoginController {
 
       tap((t) => user = t),
       mergeMap((m: any) => m ? from(bcrypt.compare(password, m.password)) : throwError(() => 1)),
-      mergeMap((m) => m ? of({ token: createToken({ ...user }), id: user._id }) : throwError(() => 2))
+      mergeMap((m) => m ? of({ token: createToken({ ...user }) }) : throwError(() => 2))
     )
   }
   //-----------------------------------------------------------------------------------------------------------------------------------------------------

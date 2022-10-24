@@ -60,14 +60,14 @@ export class UserController {
 
   public static deleteUser(id: string) {
     return of(true).pipe(
-      mergeMap(() => UserSchema.findByIdAndDelete(id).select(["-password"]))
+      mergeMap(() => UserSchema.findByIdAndDelete(id).select(["-password", "-_id"]))
     )
   }
   //---------------------------------------------------------------------------------------------------------------------------------------------------- 
   public static updateUser(id: string, data) {
     delete data.deposit
     return of(true).pipe(
-      mergeMap(() => UserSchema.findByIdAndUpdate(id, data).select(["-password"]))
+      mergeMap(() => UserSchema.findByIdAndUpdate(id, data).select(["-password", "-_id"]))
     )
   }
   //----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -19,7 +19,7 @@ app.use(cors())
 
 
 // ---------------------------------------------------------LogIn----------------------------------------------------------------------------
-app.post("/login/user", (req, res) => {
+app.post("/api/user/login", (req, res) => {
   const p = LoginController.UserLogIn(req.body).pipe(take(1)).subscribe(
     {
       next(r) {
@@ -48,9 +48,8 @@ app.post("/login/user", (req, res) => {
     }
   )
 })
-// ---------------------------------------------------------signUp----------------------------------------------------------------------------
 
-app.post("/signup", (req, res) => {
+app.post("/api/user/signup", (req, res) => {
   const p = UserController.createUser(req.body).pipe(take(1)).subscribe(
     {
       next(r) {
@@ -74,8 +73,7 @@ app.post("/signup", (req, res) => {
     }
   )
 })
-//-------------------------------------------------------------User-------------------------------------------------------------------------------------------
-app.get("/user/:id", isTokenValid, (req, res) => {
+app.get("/api/user/:id", isTokenValid, (req, res) => {
   const p = UserController.findUser(req.params.id).pipe(take(1)).subscribe(
     {
       next(r) {
@@ -87,8 +85,8 @@ app.get("/user/:id", isTokenValid, (req, res) => {
     }
   )
 })
-//-------------------------------------------------------------User-------------------------------------------------------------------------------------------
-app.get("/users/all/:pn", isTokenValid, (req, res) => {
+
+app.get("/api/users/all/:pn", isTokenValid, (req, res) => {
   const p = UserController.findAllUserPagination(Number(req.params.id)).pipe(take(1)).subscribe(
     {
       next(r) {
@@ -100,8 +98,8 @@ app.get("/users/all/:pn", isTokenValid, (req, res) => {
     }
   )
 })
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-app.put("/user/:id", isTokenValid, (req, res) => {
+
+app.put("/api/user/:id", isTokenValid, (req, res) => {
   if (req.user.id === req.params.id) {
 
     const p = UserController.updateUser(req.params.id, req.body).pipe(take(1)).subscribe(
@@ -119,8 +117,8 @@ app.put("/user/:id", isTokenValid, (req, res) => {
   }
 
 })
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-app.delete("/user/:id", isTokenValid, (req, res) => {
+
+app.delete("/api/user/:id", isTokenValid, (req, res) => {
   if (req.user.id === req.params.id) {
 
     const p = UserController.deleteUser(req.params.id).pipe(take(1)).subscribe(
@@ -139,8 +137,8 @@ app.delete("/user/:id", isTokenValid, (req, res) => {
 
 })
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
-// ---------------------------------------------------------signUp----------------------------------------------------------------------------
-app.post("/product", isTokenValid, isSeller, (req, res) => {
+// -------------------------------------------------------------------------------------------------------------------------------------
+app.post("/api/product", isTokenValid, isSeller, (req, res) => {
 
   const p = ProductController.createProduct(req.body, req.user.id).pipe(take(1)).subscribe(
     {
@@ -156,8 +154,23 @@ app.post("/product", isTokenValid, isSeller, (req, res) => {
   )
 
 })
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-app.put("/product/:id", isTokenValid, isSeller, (req, res) => {
+
+
+app.get('/api/product/:id', isTokenValid, (req, res) => {
+
+  const p = ProductController.findProduct(req.params.id).pipe(take(1)).subscribe(
+    {
+      next(r) {
+        res.send(r)
+      },
+      error() {
+        res.status(400).json({ message: 'product not found' })
+      }
+    }
+  )
+})
+
+app.put("/api/product/:id", isTokenValid, isSeller, (req, res) => {
 
   const p = ProductController.updateProduct(req.params.id, req.user.id, req.body).pipe(take(1)).subscribe(
     {
@@ -171,8 +184,8 @@ app.put("/product/:id", isTokenValid, isSeller, (req, res) => {
   )
 
 })
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-app.delete("/product/:id", isTokenValid, isSeller, (req, res) => {
+
+app.delete("/api/product/:id", isTokenValid, isSeller, (req, res) => {
   const p = ProductController.deleteProduct(req.params.id, req.user.id).pipe(take(1)).subscribe(
     {
       next(r) {
@@ -187,8 +200,8 @@ app.delete("/product/:id", isTokenValid, isSeller, (req, res) => {
 
 
 })
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-app.get("/products/all/:pn", isTokenValid, (req, res) => {
+
+app.get("/api/products/all/:pn", isTokenValid, (req, res) => {
 
   const p = ProductController.findAllProductPagination(Number(req.params.pn)).pipe(take(1)).subscribe(
     {
@@ -202,30 +215,8 @@ app.get("/products/all/:pn", isTokenValid, (req, res) => {
   )
 
 })
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-// ---------------------------------------------------------deposit----------------------------------------------------------------------------
-app.get("/deposite/add/:coins", isTokenValid, isBuyer, (req, res) => {
 
-  const coins = Number(req.params.coins)
-  if (COINS_ARRAY.includes(coins)) {
-    const p = DepositeController.addCoinsToAccount(req.user.id, coins).pipe(take(1)).subscribe(
-      {
-        next(r) {
-          res.send(r)
-        },
-        error(e) {
-          res.sendStatus(404)
-        }
-      }
-    )
-  } else {
-    res.status(400).json({ message: `only buyers can add coins and coins must be in ${[...COINS_ARRAY]}` })
-  }
-
-
-})
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-app.post("/product/buy", isTokenValid, isBuyer, (req, res) => {
+app.post("/api/product/buy", isTokenValid, isBuyer, (req, res) => {
 
   const p = DepositeController.purchaseProduct(req.body.productId, req.body.amount, req.user.id).pipe(take(1)).subscribe(
     {
@@ -260,7 +251,30 @@ app.post("/product/buy", isTokenValid, isBuyer, (req, res) => {
 
 })
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
-app.post("/deposit/reset/:id", isTokenValid, (req, res) => {
+// ---------------------------------------------------------deposit----------------------------------------------------------------------------
+app.get("/api/deposite/add/:coins", isTokenValid, isBuyer, (req, res) => {
+
+  const coins = Number(req.params.coins)
+  if (COINS_ARRAY.includes(coins)) {
+    const p = DepositeController.addCoinsToAccount(req.user.id, coins).pipe(take(1)).subscribe(
+      {
+        next(r) {
+          res.send(r)
+        },
+        error(e) {
+          res.sendStatus(404)
+        }
+      }
+    )
+  } else {
+    res.status(400).json({ message: `only buyers can add coins and coins must be in ${[...COINS_ARRAY]}` })
+  }
+
+
+})
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+app.post("/api/deposit/reset/:id", isTokenValid, isBuyer, (req, res) => {
 
   if (req.user.id === req.params.id) {
     const p = DepositeController.resetDeposit(req.user.id).pipe(take(1)).subscribe(
