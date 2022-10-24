@@ -24,6 +24,12 @@ class ProductController {
         if (!amountAvailable || !cost || !productName) {
             return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => (0, rxjs_1.throwError)(() => 1)));
         }
+        if (amountAvailable % 1 !== 0 || amountAvailable < 0) {
+            return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => (0, rxjs_1.throwError)(() => 2)));
+        }
+        if (cost < 0) {
+            return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => (0, rxjs_1.throwError)(() => 3)));
+        }
         const product = new product_1.Product(body);
         return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => product_2.default.create(Object.assign(Object.assign({}, product), { sellerId }))), (0, rxjs_1.map)((m) => {
             const _a = m._doc, { sellerId } = _a, product = __rest(_a, ["sellerId"]);
@@ -57,7 +63,13 @@ class ProductController {
     }
     //----------------------------------------------------------------------------------------------------------------------------------------------------
     static updateProduct(id, sellerId, data) {
-        return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => product_2.default.findOneAndUpdate({ _id: id, sellerId }, data, { new: true })), (0, rxjs_1.mergeMap)((m) => !m ? (0, rxjs_1.throwError)(() => 1) : (0, rxjs_1.of)(m)));
+        const { cost, amountAvailable } = data;
+        if (amountAvailable !== null && amountAvailable % 1 === 0 && amountAvailable >= 0) {
+            return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => product_2.default.findOneAndUpdate({ _id: id, sellerId }, Object.assign(Object.assign({}, data), { sellerId }), { new: true })), (0, rxjs_1.mergeMap)((m) => !m ? (0, rxjs_1.throwError)(() => 1) : (0, rxjs_1.of)(m)));
+        }
+        else {
+            return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => (0, rxjs_1.throwError)(() => 2)));
+        }
     }
 }
 exports.ProductController = ProductController;

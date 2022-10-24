@@ -21,7 +21,8 @@ class DepositeController {
                 this.findUser(buyerId)
             ]);
         }), (0, rxjs_1.mergeMap)((m) => {
-            if (m[0].cost * amount > m[1].deposit) {
+            const total = m[0].cost * amount;
+            if (total > m[1].deposit) {
                 return (0, rxjs_2.throwError)(() => 1);
             }
             if (m[0].amountAvailable < amount) {
@@ -36,7 +37,7 @@ class DepositeController {
         }), (0, rxjs_1.mergeMap)((m) => {
             let cost = m[0].cost * amount;
             return (0, rxjs_1.forkJoin)([
-                this.calculatePurchaseProduct(productId),
+                this.calculatePurchaseProduct(productId, amount),
                 this.calculatePurchaseBuyer(buyerId, cost),
                 this.calculatePurchaseSeller(m[0].sellerId, cost),
             ]);
@@ -44,22 +45,22 @@ class DepositeController {
     }
     //-----------------------------------------------------------------------------------------------------------------------------------------------------
     static resetDeposit(id) {
-        return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => user_1.default.findByIdAndUpdate(id, { deposit: 0 }, { new: true })));
+        return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => user_1.default.findByIdAndUpdate(id, { deposit: 0 }, { new: true }).select(['-_id', '-password'])));
     }
     //-----------------------------------------------------------------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------------------------------------------------------
-    static calculatePurchaseProduct(id) {
-        return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => product_1.default.findByIdAndUpdate(id, { $inc: { amountAvailable: -1 } }, { new: true })));
+    static calculatePurchaseProduct(id, amount) {
+        return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => product_1.default.findByIdAndUpdate(id, { $inc: { amountAvailable: -amount } }, { new: true })));
     }
     //----------------------------------------------------------------------------------------------------------------------------------------------------- 
     static calculatePurchaseBuyer(id, cost) {
         return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => user_1.default.findByIdAndUpdate(id, { $inc: { deposit: -cost } }, { new: true })));
     }
     //----------------------------------------------------------------------------------------------------------------------------------------------------- 
-    static calculatePurchaseSeller(sellerId, amount) {
-        return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => user_1.default.findByIdAndUpdate({ _id: sellerId }, { $inc: { deposit: amount } }, { new: true })));
+    static calculatePurchaseSeller(sellerId, cost) {
+        return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => user_1.default.findByIdAndUpdate({ _id: sellerId }, { $inc: { deposit: cost } }, { new: true })));
     }
     //----------------------------------------------------------------------------------------------------------------------------------------------------- 
     //----------------------------------------------------------------------------------------------------------------------------------------------------- 

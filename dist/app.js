@@ -46,7 +46,6 @@ app.post("/api/user/login", (req, res) => {
         }
     });
 });
-// ---------------------------------------------------------signUp----------------------------------------------------------------------------
 app.post("/api/user/signup", (req, res) => {
     const p = user_1.UserController.createUser(req.body).pipe((0, rxjs_1.take)(1)).subscribe({
         next(r) {
@@ -66,7 +65,6 @@ app.post("/api/user/signup", (req, res) => {
         }
     });
 });
-//-------------------------------------------------------------User-------------------------------------------------------------------------------------------
 app.get("/api/user/:id", authontication_1.isTokenValid, (req, res) => {
     const p = user_1.UserController.findUser(req.params.id).pipe((0, rxjs_1.take)(1)).subscribe({
         next(r) {
@@ -77,7 +75,6 @@ app.get("/api/user/:id", authontication_1.isTokenValid, (req, res) => {
         }
     });
 });
-//-------------------------------------------------------------User-------------------------------------------------------------------------------------------
 app.get("/api/users/all/:pn", authontication_1.isTokenValid, (req, res) => {
     const p = user_1.UserController.findAllUserPagination(Number(req.params.id)).pipe((0, rxjs_1.take)(1)).subscribe({
         next(r) {
@@ -88,7 +85,6 @@ app.get("/api/users/all/:pn", authontication_1.isTokenValid, (req, res) => {
         }
     });
 });
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
 app.put("/api/user/:id", authontication_1.isTokenValid, (req, res) => {
     if (req.user.id === req.params.id) {
         const p = user_1.UserController.updateUser(req.params.id, req.body).pipe((0, rxjs_1.take)(1)).subscribe({
@@ -104,7 +100,6 @@ app.put("/api/user/:id", authontication_1.isTokenValid, (req, res) => {
         res.status(403).json({ message: 'you can only update your own account' });
     }
 });
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
 app.delete("/api/user/:id", authontication_1.isTokenValid, (req, res) => {
     if (req.user.id === req.params.id) {
         const p = user_1.UserController.deleteUser(req.params.id).pipe((0, rxjs_1.take)(1)).subscribe({
@@ -121,29 +116,58 @@ app.delete("/api/user/:id", authontication_1.isTokenValid, (req, res) => {
     }
 });
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
-// ---------------------------------------------------------signUp----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------------------------
 app.post("/api/product", authontication_1.isTokenValid, authontication_1.isSeller, (req, res) => {
     const p = product_1.ProductController.createProduct(req.body, req.user.id).pipe((0, rxjs_1.take)(1)).subscribe({
         next(r) {
             res.send(r);
         },
         error(e) {
-            e === 1 ? res.status(400).json({ message: 'please provide amountAvailable ,cost and productName ' }) : res.sendStatus(400);
+            switch (e) {
+                case 1:
+                    res.status(400).json({ message: 'please provide amountAvailable ,cost and productName ' });
+                    break;
+                case 2:
+                    res.status(400).json({ message: "amount available must be a whole positive number or 0" });
+                    break;
+                case 3:
+                    res.status(400).json({ message: "cost must be a  positive number or 0" });
+                    break;
+                default:
+                    res.sendStatus(400);
+            }
         }
     });
 });
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
+app.get('/api/product/:id', authontication_1.isTokenValid, (req, res) => {
+    const p = product_1.ProductController.findProduct(req.params.id).pipe((0, rxjs_1.take)(1)).subscribe({
+        next(r) {
+            res.send(r);
+        },
+        error() {
+            res.status(400).json({ message: 'product not found' });
+        }
+    });
+});
 app.put("/api/product/:id", authontication_1.isTokenValid, authontication_1.isSeller, (req, res) => {
     const p = product_1.ProductController.updateProduct(req.params.id, req.user.id, req.body).pipe((0, rxjs_1.take)(1)).subscribe({
         next(r) {
             res.send(r);
         },
         error(e) {
-            e === 1 ? res.status(403).json({ message: 'you can only delete your own products' }) : res.sendStatus(400);
+            switch (e) {
+                case 1:
+                    res.status(403).json({ message: 'you can only delete your own products' });
+                    break;
+                case 2:
+                    res.status(400).json({ message: "amount available must be a whole positive number or 0" });
+                    break;
+                default:
+                    res.sendStatus(400);
+            }
         }
     });
 });
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
 app.delete("/api/product/:id", authontication_1.isTokenValid, authontication_1.isSeller, (req, res) => {
     const p = product_1.ProductController.deleteProduct(req.params.id, req.user.id).pipe((0, rxjs_1.take)(1)).subscribe({
         next(r) {
@@ -154,8 +178,7 @@ app.delete("/api/product/:id", authontication_1.isTokenValid, authontication_1.i
         }
     });
 });
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-app.get("/pi/products/all/:pn", authontication_1.isTokenValid, (req, res) => {
+app.get("/api/products/all/:pn", authontication_1.isTokenValid, (req, res) => {
     const p = product_1.ProductController.findAllProductPagination(Number(req.params.pn)).pipe((0, rxjs_1.take)(1)).subscribe({
         next(r) {
             res.send(r);
@@ -165,7 +188,6 @@ app.get("/pi/products/all/:pn", authontication_1.isTokenValid, (req, res) => {
         }
     });
 });
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
 app.post("/api/product/buy", authontication_1.isTokenValid, authontication_1.isBuyer, (req, res) => {
     const p = deposite_1.DepositeController.purchaseProduct(req.body.productId, req.body.amount, req.user.id).pipe((0, rxjs_1.take)(1)).subscribe({
         next(r) {
@@ -213,20 +235,15 @@ app.get("/api/deposite/add/:coins", authontication_1.isTokenValid, authonticatio
     }
 });
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
-app.post("/api/deposit/reset/:id", authontication_1.isTokenValid, (req, res) => {
-    if (req.user.id === req.params.id) {
-        const p = deposite_1.DepositeController.resetDeposit(req.user.id).pipe((0, rxjs_1.take)(1)).subscribe({
-            next(r) {
-                res.send(r);
-            },
-            error(e) {
-                res.sendStatus(404);
-            }
-        });
-    }
-    else {
-        res.sendStatus(403);
-    }
+app.post("/api/deposit/reset", authontication_1.isTokenValid, authontication_1.isBuyer, (req, res) => {
+    const p = deposite_1.DepositeController.resetDeposit(req.user.id).pipe((0, rxjs_1.take)(1)).subscribe({
+        next(r) {
+            res.send(r);
+        },
+        error(e) {
+            res.sendStatus(404);
+        }
+    });
 });
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 const PORT = process.env.PORT || 3000;

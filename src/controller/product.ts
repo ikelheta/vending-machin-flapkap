@@ -15,6 +15,16 @@ export class ProductController {
         mergeMap(() => throwError(() => 1))
       )
     }
+    if (amountAvailable % 1 !== 0 || amountAvailable < 0) {
+      return of(true).pipe(
+        mergeMap(() => throwError(() => 2))
+      )
+    }
+    if (cost < 0) {
+      return of(true).pipe(
+        mergeMap(() => throwError(() => 3))
+      )
+    }
     const product = new Product(body)
     return of(true).pipe(
       mergeMap(() => ProductSchema.create({ ...product, sellerId })),
@@ -66,12 +76,21 @@ export class ProductController {
   }
   //----------------------------------------------------------------------------------------------------------------------------------------------------
   public static updateProduct(id: string, sellerId, data) {
+    const { cost, amountAvailable } = data
+
+    if (amountAvailable !== null && amountAvailable % 1 === 0 && amountAvailable >= 0) {
+      return of(true).pipe(
+        mergeMap(() => ProductSchema.findOneAndUpdate({ _id: id, sellerId }, { ...data, sellerId }, { new: true })),
+        mergeMap((m) => !m ? throwError(() => 1) : of(m))
+      )
+    } else {
+      return of(true).pipe(
+        mergeMap(() => throwError(() => 2))
+      )
+    }
 
 
-    return of(true).pipe(
-      mergeMap(() => ProductSchema.findOneAndUpdate({ _id: id, sellerId }, data, { new: true })),
-      mergeMap((m) => !m ? throwError(() => 1) : of(m))
-    )
+
   }
   //----------------------------------------------------------------------------------------------------------------------------------------------------
   //----------------------------------------------------------------------------------------------------------------------------------------------------

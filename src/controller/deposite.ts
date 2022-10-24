@@ -28,7 +28,8 @@ export class DepositeController {
         ])
       }),
       mergeMap((m) => {
-        if (m[0].cost * amount > m[1].deposit) {
+        const total = m[0].cost * amount
+        if (total > m[1].deposit) {
           return throwError(() => 1)
         }
         if (m[0].amountAvailable < amount) {
@@ -44,7 +45,7 @@ export class DepositeController {
       mergeMap((m) => {
         let cost = m[0].cost * amount
         return forkJoin([
-          this.calculatePurchaseProduct(productId),
+          this.calculatePurchaseProduct(productId, amount),
           this.calculatePurchaseBuyer(buyerId, cost),
           this.calculatePurchaseSeller(m[0].sellerId, cost),
 
@@ -56,7 +57,7 @@ export class DepositeController {
   //-----------------------------------------------------------------------------------------------------------------------------------------------------
   public static resetDeposit(id: string) {
     return of(true).pipe(
-      mergeMap(() => UserSchema.findByIdAndUpdate(id, { deposit: 0 }, { new: true }))
+      mergeMap(() => UserSchema.findByIdAndUpdate(id, { deposit: 0 }, { new: true }).select(['-_id', '-password']))
     )
   }
 
@@ -67,9 +68,9 @@ export class DepositeController {
   //-----------------------------------------------------------------------------------------------------------------------------------------------------
   //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-  private static calculatePurchaseProduct(id: string): Observable<Product> {
+  private static calculatePurchaseProduct(id: string, amount): Observable<Product> {
     return of(true).pipe(
-      mergeMap(() => ProductSchema.findByIdAndUpdate(id, { $inc: { amountAvailable: -1 } }, { new: true }))
+      mergeMap(() => ProductSchema.findByIdAndUpdate(id, { $inc: { amountAvailable: -amount } }, { new: true }))
     )
   }
   //----------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -79,9 +80,9 @@ export class DepositeController {
     )
   }
   //----------------------------------------------------------------------------------------------------------------------------------------------------- 
-  private static calculatePurchaseSeller(sellerId: string, amount: number) {
+  private static calculatePurchaseSeller(sellerId: string, cost: number) {
     return of(true).pipe(
-      mergeMap(() => UserSchema.findByIdAndUpdate({ _id: sellerId }, { $inc: { deposit: amount } }, { new: true }))
+      mergeMap(() => UserSchema.findByIdAndUpdate({ _id: sellerId }, { $inc: { deposit: cost } }, { new: true }))
     )
   }
   //----------------------------------------------------------------------------------------------------------------------------------------------------- 

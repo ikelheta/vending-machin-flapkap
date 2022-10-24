@@ -146,9 +146,20 @@ app.post("/api/product", isTokenValid, isSeller, (req, res) => {
         res.send(r)
       },
       error(e) {
+        switch (e) {
+          case 1:
+            res.status(400).json({ message: 'please provide amountAvailable ,cost and productName ' })
+            break
+          case 2:
+            res.status(400).json({ message: "amount available must be a whole positive number or 0" })
+            break
+          case 3:
+            res.status(400).json({ message: "cost must be a  positive number or 0" })
+            break
+          default:
+            res.sendStatus(400)
 
-        e === 1 ? res.status(400).json({ message: 'please provide amountAvailable ,cost and productName ' }) : res.sendStatus(400)
-
+        }
       }
     }
   )
@@ -178,7 +189,18 @@ app.put("/api/product/:id", isTokenValid, isSeller, (req, res) => {
         res.send(r)
       },
       error(e) {
-        e === 1 ? res.status(403).json({ message: 'you can only delete your own products' }) : res.sendStatus(400)
+        switch (e) {
+          case 1:
+            res.status(403).json({ message: 'you can only delete your own products' })
+            break
+          case 2:
+            res.status(400).json({ message: "amount available must be a whole positive number or 0" })
+            break
+          default:
+            res.sendStatus(400)
+
+        }
+
       }
     }
   )
@@ -274,22 +296,19 @@ app.get("/api/deposite/add/:coins", isTokenValid, isBuyer, (req, res) => {
 })
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 
-app.post("/api/deposit/reset/:id", isTokenValid, isBuyer, (req, res) => {
+app.post("/api/deposit/reset", isTokenValid, isBuyer, (req, res) => {
 
-  if (req.user.id === req.params.id) {
-    const p = DepositeController.resetDeposit(req.user.id).pipe(take(1)).subscribe(
-      {
-        next(r) {
-          res.send(r)
-        },
-        error(e) {
-          res.sendStatus(404)
-        }
+
+  const p = DepositeController.resetDeposit(req.user.id).pipe(take(1)).subscribe(
+    {
+      next(r) {
+        res.send(r)
+      },
+      error(e) {
+        res.sendStatus(404)
       }
-    )
-  } else {
-    res.sendStatus(403)
-  }
+    }
+  )
 })
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------

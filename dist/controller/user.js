@@ -43,12 +43,12 @@ class UserController {
     }
     //---------------------------------------------------------------------------------------------------------------------------------------------------- 
     static deleteUser(id) {
-        return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => user_2.default.findByIdAndDelete(id).select(["-password"])));
+        return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => user_2.default.findByIdAndDelete(id).select(["-password", "-_id"])));
     }
     //---------------------------------------------------------------------------------------------------------------------------------------------------- 
     static updateUser(id, data) {
         delete data.deposit;
-        return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => user_2.default.findByIdAndUpdate(id, data).select(["-password"])));
+        return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => user_2.default.findByIdAndUpdate(id, data).select(["-password", "-_id"])));
     }
 }
 exports.UserController = UserController;
