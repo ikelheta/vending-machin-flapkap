@@ -6,8 +6,8 @@ export const userTests = (request, app) => {
   describe("createUser", () => {
     it("should create a new user", async () => {
       const payload = {
-        userName: "omar2",
-        password: "123456789",
+        userName: "ibrahim",
+        password: "123",
         role: "seller",
       };
       const res = await request(app).post("/signup").send(payload);
