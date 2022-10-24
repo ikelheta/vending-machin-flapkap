@@ -47,7 +47,7 @@ export class UserController {
   //---------------------------------------------------------------------------------------------------------------------------------------------------- 
   private static allUser(pn: number) {
     return of(true).pipe(
-      mergeMap(() => UserSchema.find({}).sort({ _id: -1 }).skip((pn - 1) * 10).limit(10).select(["userName", "role"])),
+      mergeMap(() => UserSchema.find({}).sort({ _id: -1 }).skip((pn - 1) * 10).limit(10).select(["-password", '-_id'])),
     )
   }
   //---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -65,9 +65,11 @@ export class UserController {
   }
   //---------------------------------------------------------------------------------------------------------------------------------------------------- 
   public static updateUser(id: string, data) {
-    delete data.deposit
+    const { password } = data
     return of(true).pipe(
-      mergeMap(() => UserSchema.findByIdAndUpdate(id, data).select(["-password", "-_id"]))
+      mergeMap(() => from(bcrypt.hash(password, 10))),
+      mergeMap((m) => UserSchema.findByIdAndUpdate(id, { password: m }, { new: true }).select(["-password", "-_id"])),
+      mergeMap((m) => m ? of(m) : throwError(() => 1))
     )
   }
   //----------------------------------------------------------------------------------------------------------------------------------------------------

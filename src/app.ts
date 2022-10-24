@@ -87,7 +87,7 @@ app.get("/api/user/:id", isTokenValid, (req, res) => {
 })
 
 app.get("/api/users/all/:pn", isTokenValid, (req, res) => {
-  const p = UserController.findAllUserPagination(Number(req.params.id)).pipe(take(1)).subscribe(
+  const p = UserController.findAllUserPagination(Number(req.params.pn)).pipe(take(1)).subscribe(
     {
       next(r) {
         res.send(r)
@@ -99,42 +99,33 @@ app.get("/api/users/all/:pn", isTokenValid, (req, res) => {
   )
 })
 
-app.put("/api/user/:id", isTokenValid, (req, res) => {
-  if (req.user.id === req.params.id) {
+app.put("/api/user", isTokenValid, (req, res) => {
 
-    const p = UserController.updateUser(req.params.id, req.body).pipe(take(1)).subscribe(
-      {
-        next(r) {
-          res.send(r)
-        },
-        error(e) {
-          res.sendStatus(500)
-        }
+  const p = UserController.updateUser(req.user.id, req.body).pipe(take(1)).subscribe(
+    {
+      next(r) {
+        res.send(r)
+      },
+      error(e) {
+        e === 1 ? res.status(403).json({ message: 'you can only update your own account' }) : res.sendStatus(400)
       }
-    )
-  } else {
-    res.status(403).json({ message: 'you can only update your own account' })
-  }
+    }
+  )
 
 })
 
-app.delete("/api/user/:id", isTokenValid, (req, res) => {
-  if (req.user.id === req.params.id) {
+app.delete("/api/user", isTokenValid, (req, res) => {
 
-    const p = UserController.deleteUser(req.params.id).pipe(take(1)).subscribe(
-      {
-        next(r) {
-          res.send(r)
-        },
-        error(e) {
-          res.sendStatus(401)
-        }
+  const p = UserController.deleteUser(req.user.id).pipe(take(1)).subscribe(
+    {
+      next(r) {
+        res.send(r)
+      },
+      error(e) {
+        res.status(403).json({ message: 'this account is not exist' })
       }
-    )
-  } else {
-    res.status(403).json({ message: 'you can only delete your own account' })
-  }
-
+    }
+  )
 })
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------------------------

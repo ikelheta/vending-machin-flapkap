@@ -35,7 +35,7 @@ class UserController {
     }
     //---------------------------------------------------------------------------------------------------------------------------------------------------- 
     static allUser(pn) {
-        return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => user_2.default.find({}).sort({ _id: -1 }).skip((pn - 1) * 10).limit(10).select(["userName", "role"])));
+        return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => user_2.default.find({}).sort({ _id: -1 }).skip((pn - 1) * 10).limit(10).select(["-password", '-_id'])));
     }
     //---------------------------------------------------------------------------------------------------------------------------------------------------- 
     static userCount() {
@@ -47,8 +47,8 @@ class UserController {
     }
     //---------------------------------------------------------------------------------------------------------------------------------------------------- 
     static updateUser(id, data) {
-        delete data.deposit;
-        return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => user_2.default.findByIdAndUpdate(id, data).select(["-password", "-_id"])));
+        const { password } = data;
+        return (0, rxjs_1.of)(true).pipe((0, rxjs_1.mergeMap)(() => (0, rxjs_1.from)(bcrypt_1.default.hash(password, 10))), (0, rxjs_1.mergeMap)((m) => user_2.default.findByIdAndUpdate(id, { password: m }, { new: true }).select(["-password", "-_id"])), (0, rxjs_1.mergeMap)((m) => m ? (0, rxjs_1.of)(m) : (0, rxjs_1.throwError)(() => 1)));
     }
 }
 exports.UserController = UserController;

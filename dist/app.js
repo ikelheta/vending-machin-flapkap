@@ -76,7 +76,7 @@ app.get("/api/user/:id", authontication_1.isTokenValid, (req, res) => {
     });
 });
 app.get("/api/users/all/:pn", authontication_1.isTokenValid, (req, res) => {
-    const p = user_1.UserController.findAllUserPagination(Number(req.params.id)).pipe((0, rxjs_1.take)(1)).subscribe({
+    const p = user_1.UserController.findAllUserPagination(Number(req.params.pn)).pipe((0, rxjs_1.take)(1)).subscribe({
         next(r) {
             res.send(r);
         },
@@ -85,35 +85,25 @@ app.get("/api/users/all/:pn", authontication_1.isTokenValid, (req, res) => {
         }
     });
 });
-app.put("/api/user/:id", authontication_1.isTokenValid, (req, res) => {
-    if (req.user.id === req.params.id) {
-        const p = user_1.UserController.updateUser(req.params.id, req.body).pipe((0, rxjs_1.take)(1)).subscribe({
-            next(r) {
-                res.send(r);
-            },
-            error(e) {
-                res.sendStatus(500);
-            }
-        });
-    }
-    else {
-        res.status(403).json({ message: 'you can only update your own account' });
-    }
+app.put("/api/user", authontication_1.isTokenValid, (req, res) => {
+    const p = user_1.UserController.updateUser(req.user.id, req.body).pipe((0, rxjs_1.take)(1)).subscribe({
+        next(r) {
+            res.send(r);
+        },
+        error(e) {
+            e === 1 ? res.status(403).json({ message: 'you can only update your own account' }) : res.sendStatus(400);
+        }
+    });
 });
-app.delete("/api/user/:id", authontication_1.isTokenValid, (req, res) => {
-    if (req.user.id === req.params.id) {
-        const p = user_1.UserController.deleteUser(req.params.id).pipe((0, rxjs_1.take)(1)).subscribe({
-            next(r) {
-                res.send(r);
-            },
-            error(e) {
-                res.sendStatus(401);
-            }
-        });
-    }
-    else {
-        res.status(403).json({ message: 'you can only delete your own account' });
-    }
+app.delete("/api/user", authontication_1.isTokenValid, (req, res) => {
+    const p = user_1.UserController.deleteUser(req.user.id).pipe((0, rxjs_1.take)(1)).subscribe({
+        next(r) {
+            res.send(r);
+        },
+        error(e) {
+            res.status(403).json({ message: 'this account is not exist' });
+        }
+    });
 });
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------------------------
