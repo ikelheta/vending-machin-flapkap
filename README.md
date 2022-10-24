@@ -4,8 +4,8 @@
 ## summary
 
 
-### Simple vending-machine app created with node Typescript (express), rxjs and mongoDb
-### using Object oriented design pattern
+Simple vending-machine app created with node Typescript (express), rxjs and mongoDb
+using Object oriented design pattern
 
 
 
