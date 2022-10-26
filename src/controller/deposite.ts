@@ -2,7 +2,7 @@ import { COINS_ARRAY } from './../utilis/constants';
 import { Product } from "../model/product";
 import { createToken } from './../middleware/authontication';
 import { User, IUser } from './../model/user';
-import { mergeMap, of, from, map, forkJoin, delay, catchError } from "rxjs";
+import { mergeMap, of, from, map, forkJoin, delay, catchError, tap } from "rxjs";
 import UserSchema from "../db/user"
 import ProductSchema from "../db/product"
 import bcrypt from "bcrypt"
@@ -14,7 +14,7 @@ import { Observable, throwError } from 'rxjs';
 export class DepositeController {
   public static addCoinsToAccount(id: string, coins: number) {
     return of(true).pipe(
-      mergeMap(() => UserSchema.findByIdAndUpdate(id, { $inc: { deposit: coins } }, { new: true })),
+      mergeMap(() => UserSchema.findByIdAndUpdate(id, { $inc: { deposit: coins } }, { new: true }).select(["-id", '-password'])),
 
     )
   }
@@ -90,7 +90,7 @@ export class DepositeController {
   private static findProduct(id: string): Observable<any> {
     return of(true).pipe(
       mergeMap(() => ProductSchema.findById(id)),
-      catchError(() => throwError(() => 4))
+      mergeMap((m) => m ? of(m) : throwError(() => 4))
 
     )
   }
@@ -98,7 +98,7 @@ export class DepositeController {
   private static findUser(id: string): Observable<User> {
     return of(true).pipe(
       mergeMap(() => UserSchema.findById(id).select(["-password", "-_id"])),
-      catchError(() => throwError(() => 5))
+      mergeMap((m) => m ? of(m) : throwError(() => 5))
     )
   }
   // ----------------------------------------------------------------------------------------------------------------------------------------------------- 

@@ -20,7 +20,6 @@ export class UserController {
       mergeMap((m) => m.length === 0 ? of(user) : throwError(() => 2)),
       mergeMap((m) => from(bcrypt.hash(m.password, 10))),
       mergeMap((m) => from(UserSchema.create({ ...user, password: m }))),
-      tap((t) => console.log(t)),
       map((m) => {
         return { token: createToken({ ...m }) }
       })

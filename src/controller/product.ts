@@ -3,6 +3,7 @@ import { createToken } from './../middleware/authontication';
 import { User, IUser } from './../model/user';
 import { mergeMap, of, from, map, forkJoin, throwError, tap } from "rxjs";
 import ProductSchema from "../db/product"
+import mongoose from "mongoose"
 import bcrypt from "bcrypt"
 import { Observable } from 'rx';
 
@@ -10,17 +11,17 @@ export class ProductController {
   public static createProduct(body, sellerId) {
 
     const { amountAvailable, cost, productName } = body
-    if (!amountAvailable || !cost || !productName) {
+    if (amountAvailable == null || cost == null || productName == null) {
       return of(true).pipe(
         mergeMap(() => throwError(() => 1))
       )
     }
-    if (amountAvailable % 1 !== 0 || amountAvailable < 0) {
+    if (amountAvailable % 1 !== 0 || amountAvailable <= 0) {
       return of(true).pipe(
         mergeMap(() => throwError(() => 2))
       )
     }
-    if (cost < 0) {
+    if (cost <= 0) {
       return of(true).pipe(
         mergeMap(() => throwError(() => 3))
       )
@@ -37,10 +38,12 @@ export class ProductController {
 
   }
   //----------------------------------------------------------------------------------------------------------------------------------------------------
-  public static findProduct(id: string) {
+  public static findProduct(id: mongoose.Types.ObjectId) {
+
+
     return of(true).pipe(
-      mergeMap(() => ProductSchema.findById(id))
-    )
+      mergeMap(() => ProductSchema.findById(id)),
+      mergeMap((m) => m == null ? throwError(() => 1) : of(m)))
   }
   //----------------------------------------------------------------------------------------------------------------------------------------------------
   public static findAllProductPagination(pn: number) {
@@ -70,7 +73,6 @@ export class ProductController {
   public static deleteProduct(id: string, sellerId) {
     return of(true).pipe(
       mergeMap(() => ProductSchema.findOneAndDelete({ _id: id, sellerId })),
-      tap((m) => console.log(m)),
       mergeMap((m) => !m ? throwError(() => 1) : of(m))
     )
   }
